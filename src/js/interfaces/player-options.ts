@@ -9,18 +9,20 @@ import DashOptions from './dash-options';
  * @export
  */
 export default interface PlayerOptions {
-    /**
+	notWrapInstance?: boolean;
+
+	/**
      * @type DashOptions
      */
-    dash?: DashOptions;
-    /**
+	dash?: DashOptions;
+	/**
      * @type object
      */
-    hls?: object;
+	hls?: object;
 
-    ads?: AdsOptions;
-    /**
+	ads?: AdsOptions;
+	/**
      * @type object
      */
-    [key: string]: any;
-}
+	[key: string]: any;
+};

@@ -345,7 +345,7 @@ exports.offset = offset;
 /* 6 */
 /***/ (function(module, exports) {
 
-var core = module.exports = { version: '2.5.7' };
+var core = module.exports = { version: '2.6.2' };
 if (typeof __e == 'number') __e = core; // eslint-disable-line no-undef
 
 
@@ -1071,7 +1071,7 @@ var store = global[SHARED] || (global[SHARED] = {});
 })('versions', []).push({
   version: core.version,
   mode: __webpack_require__(25) ? 'pure' : 'global',
-  copyright: '© 2018 Denis Pushkarev (zloirock.ru)'
+  copyright: '© 2019 Denis Pushkarev (zloirock.ru)'
 });
 
 
@@ -1589,6 +1589,10 @@ var Player = function () {
   }, {
     key: "_wrapInstance",
     value: function _wrapInstance() {
+      if (this.options.notWrapInstance) {
+        return;
+      }
+
       var wrapper = document.createElement('div');
       wrapper.className = 'op-player op-player__keyboard--inactive';
       wrapper.className += general_1.isAudio(this.element) ? ' op-player__audio' : ' op-player__video';
@@ -1663,7 +1667,7 @@ var Player = function () {
     value: function _createPlayButton() {
       var _this2 = this;
 
-      if (general_1.isAudio(this.element)) {
+      if (general_1.isAudio(this.element) || this.options.notWrapInstance) {
         return;
       }
 
@@ -1696,6 +1700,10 @@ var Player = function () {
     key: "_setEvents",
     value: function _setEvents() {
       var _this3 = this;
+
+      if (this.getOptions().notWrapInstance) {
+        return;
+      }
 
       if (general_1.isVideo(this.element)) {
         this.events.loadedmetadata = function () {
@@ -4528,6 +4536,10 @@ var Controls = function () {
     value: function create() {
       var _this = this;
 
+      if (this.player.getOptions().notWrapInstance) {
+        return;
+      }
+
       this.player.getElement().controls = false;
       var isMediaVideo = general_1.isVideo(this.player.getElement());
       this.controls = document.createElement('div');
@@ -5861,6 +5873,10 @@ var Settings = function () {
     value: function create() {
       var _this = this;
 
+      if (this.player.getOptions().notWrapInstance) {
+        return;
+      }
+
       this.button = document.createElement('button');
       this.button.className = 'op-controls__settings op-control__right';
       this.button.tabIndex = 0;
@@ -5980,6 +5996,10 @@ var Settings = function () {
     key: "addItem",
     value: function addItem(name, key, defaultValue, submenu, className) {
       var _this3 = this;
+
+      if (this.player.getOptions().notWrapInstance) {
+        return;
+      }
 
       var menuItem = document.createElement('div');
       menuItem.className = 'op-settings__menu-item';
@@ -6120,6 +6140,10 @@ var Time = function () {
     key: "create",
     value: function create() {
       var _this = this;
+
+      if (this.player.getOptions().notWrapInstance) {
+        return;
+      }
 
       this.current = document.createElement('time');
       this.current.className = 'op-controls__current';

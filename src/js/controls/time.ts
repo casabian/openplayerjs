@@ -14,16 +14,16 @@ import { formatTime } from '../utils/time';
  * @implements PlayerComponent
  */
 class Time implements PlayerComponent {
-    /**
+	/**
      * Instance of OpenPlayer.
      *
      * @private
      * @type Player
      * @memberof Time
      */
-    private player: Player;
+	private player: Player;
 
-    /**
+	/**
      * Element that displays media's current time being played.
      *
      * It will change to `Live Broadcast` if duration is Infinity.
@@ -31,9 +31,9 @@ class Time implements PlayerComponent {
      * @type {HTMLTimeElement}
      * @memberof Time
      */
-    private current: HTMLTimeElement;
+	private current: HTMLTimeElement;
 
-    /**
+	/**
      * Element that separates current time and duration labels.
      *
      * It will be hidden if duration is Infinity.
@@ -41,9 +41,9 @@ class Time implements PlayerComponent {
      * @type {HTMLSpanElement}
      * @memberof Time
      */
-    private delimiter: HTMLSpanElement;
+	private delimiter: HTMLSpanElement;
 
-    /**
+	/**
      * Element that displays media's total duration.
      *
      * It will be hidden if duration is Infinity.
@@ -51,9 +51,9 @@ class Time implements PlayerComponent {
      * @type {HTMLTimeElement}
      * @memberof Time
      */
-    private duration: HTMLTimeElement;
+	private duration: HTMLTimeElement;
 
-    /**
+	/**
      * Events that will be triggered in Time element:
      *  - controls (to reset time properly when `controlschanged` event is triggered).
      *  - media (to set current time and duration in `loadedmetadata`, `progress` and `timeupdate` events).
@@ -62,123 +62,132 @@ class Time implements PlayerComponent {
      * @type EventsList
      * @memberof Time
      */
-    private events: EventsList = {
-        controls: {},
-        media: {},
-    };
+	private events: EventsList = {
+		controls: {},
+		media: {}
+	};
 
-    /**
+	/**
      * Default labels from player's config
      *
      * @private
      * @type object
      * @memberof Captions
      */
-    private labels: any;
+	private labels: any;
 
-    /**
+	/**
      * Create an instance of Time.
      *
      * @param {Player} player
      * @returns {Time}
      * @memberof Time
      */
-    constructor(player: Player) {
-        this.player = player;
-        this.labels = player.getOptions().labels;
-        return this;
-    }
+	constructor(player: Player) {
+		this.player = player;
+		this.labels = player.getOptions().labels;
+		return this;
+	}
 
-    /**
+	/**
      * When no duration (Infinity) is detected, the `Live Broadcast` will be displayed.
      *
      * @inheritDoc
      * @memberof Time
      */
-    public create(): void {
-        this.current = document.createElement('time');
-        this.current.className = 'op-controls__current';
-        this.current.setAttribute('role', 'timer');
-        this.current.setAttribute('aria-live', 'off');
-        this.current.setAttribute('aria-hidden', 'false');
-        this.current.innerText = '0:00';
+	public create(): void {
+		if (this.player.getOptions().notWrapInstance) {
+			return;
+		}
+		this.current = document.createElement('time');
+		this.current.className = 'op-controls__current';
+		this.current.setAttribute('role', 'timer');
+		this.current.setAttribute('aria-live', 'off');
+		this.current.setAttribute('aria-hidden', 'false');
+		this.current.innerText = '0:00';
 
-        this.delimiter = document.createElement('span');
-        this.delimiter.className = 'op-controls__time-delimiter';
-        this.delimiter.setAttribute('aria-hidden', 'false');
-        this.delimiter.innerText = '/';
+		this.delimiter = document.createElement('span');
+		this.delimiter.className = 'op-controls__time-delimiter';
+		this.delimiter.setAttribute('aria-hidden', 'false');
+		this.delimiter.innerText = '/';
 
-        this.duration = document.createElement('time');
-        this.duration.className = 'op-controls__duration';
-        this.duration.setAttribute('aria-hidden', 'false');
-        this.duration.innerText = '0:00';
+		this.duration = document.createElement('time');
+		this.duration.className = 'op-controls__duration';
+		this.duration.setAttribute('aria-hidden', 'false');
+		this.duration.innerText = '0:00';
 
-        const setInitialTime = () => {
-            const el = this.player.activeElement();
-            if (el.duration !== Infinity && !this.player.getElement().getAttribute('op-live')) {
-                const duration = !isNaN(el.duration) ? el.duration : 0;
-                this.duration.innerText = formatTime(duration);
-                this.current.innerText = formatTime(el.currentTime);
-            } else {
-                this.duration.setAttribute('aria-hidden', 'true');
-                this.delimiter.setAttribute('aria-hidden', 'true');
-            }
-        };
+		const setInitialTime = () => {
+			const el = this.player.activeElement();
+			if (el.duration !== Infinity && !this.player.getElement().getAttribute('op-live')) {
+				const duration = !isNaN(el.duration) ? el.duration : 0;
+				this.duration.innerText = formatTime(duration);
+				this.current.innerText = formatTime(el.currentTime);
+			} else {
+				this.duration.setAttribute('aria-hidden', 'true');
+				this.delimiter.setAttribute('aria-hidden', 'true');
+			}
+		};
 
-        this.events.media.loadedmetadata = setInitialTime.bind(this);
-        this.events.controls.controlschanged = setInitialTime.bind(this);
+		this.events.media.loadedmetadata = setInitialTime.bind(this);
+		this.events.controls.controlschanged = setInitialTime.bind(this);
 
-        this.events.media.timeupdate = () => {
-            const el = this.player.activeElement();
-            if (el.duration !== Infinity && !this.player.getElement().getAttribute('op-live')) {
-                const duration = formatTime(el.duration);
-                if (!isNaN(el.duration) && duration !== this.duration.innerText) {
-                    this.duration.innerText = duration;
-                    this.duration.setAttribute('aria-hidden', 'false');
-                    this.delimiter.setAttribute('aria-hidden', 'false');
-                }
-                this.current.innerText = formatTime(el.currentTime);
-            } else if (this.duration.getAttribute('aria-hidden') === 'false') {
-                this.duration.setAttribute('aria-hidden', 'true');
-                this.delimiter.setAttribute('aria-hidden', 'true');
-                this.current.innerText = this.labels.live;
-            }
-        };
-        this.events.media.ended = () => {
-            const el = this.player.activeElement();
-            if (this.player.isMedia() && this.duration.innerText !== '0:00') {
-                this.duration.innerText = formatTime(el.duration);
-            }
-        };
+		this.events.media.timeupdate = () => {
+			const el = this.player.activeElement();
+			if (el.duration !== Infinity && !this.player.getElement().getAttribute('op-live')) {
+				const duration = formatTime(el.duration);
+				if (!isNaN(el.duration) && duration !== this.duration.innerText) {
+					this.duration.innerText = duration;
+					this.duration.setAttribute('aria-hidden', 'false');
+					this.delimiter.setAttribute('aria-hidden', 'false');
+				}
+				this.current.innerText = formatTime(el.currentTime);
+			} else if (this.duration.getAttribute('aria-hidden') === 'false') {
+				this.duration.setAttribute('aria-hidden', 'true');
+				this.delimiter.setAttribute('aria-hidden', 'true');
+				this.current.innerText = this.labels.live;
+			}
+		};
+		this.events.media.ended = () => {
+			const el = this.player.activeElement();
+			if (this.player.isMedia() && this.duration.innerText !== '0:00') {
+				this.duration.innerText = formatTime(el.duration);
+			}
+		};
 
-        Object.keys(this.events.media).forEach(event => {
-            this.player.getElement().addEventListener(event, this.events.media[event]);
-        });
+		Object.keys(this.events.media).forEach((event) => {
+			this.player.getElement().addEventListener(event, this.events.media[event]);
+		});
 
-        this.player.getControls().getContainer().addEventListener('controlschanged', this.events.controls.controlschanged);
+		this.player
+			.getControls()
+			.getContainer()
+			.addEventListener('controlschanged', this.events.controls.controlschanged);
 
-        const controls = this.player.getControls().getContainer();
-        controls.appendChild(this.current);
-        controls.appendChild(this.delimiter);
-        controls.appendChild(this.duration);
-    }
+		const controls = this.player.getControls().getContainer();
+		controls.appendChild(this.current);
+		controls.appendChild(this.delimiter);
+		controls.appendChild(this.duration);
+	}
 
-    /**
+	/**
      *
      * @inheritDoc
      * @memberof Time
      */
-    public destroy(): void {
-        Object.keys(this.events.media).forEach(event => {
-            this.player.getElement().removeEventListener(event, this.events.media[event]);
-        });
+	public destroy(): void {
+		Object.keys(this.events.media).forEach((event) => {
+			this.player.getElement().removeEventListener(event, this.events.media[event]);
+		});
 
-        this.player.getControls().getContainer().removeEventListener('controlschanged', this.events.controls.controlschanged);
+		this.player
+			.getControls()
+			.getContainer()
+			.removeEventListener('controlschanged', this.events.controls.controlschanged);
 
-        this.current.remove();
-        this.delimiter.remove();
-        this.duration.remove();
-    }
+		this.current.remove();
+		this.delimiter.remove();
+		this.duration.remove();
+	}
 }
 
 export default Time;
